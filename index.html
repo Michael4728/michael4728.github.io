@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>试验有效期监控</title>
+    <title>工器具管理与监控</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -13,19 +13,18 @@
         }
         
         body {
-            background-color: white;
+            background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 20px;
         }
         
         .container {
             width: 100%;
-            max-width: 850px;
+            max-width: 900px;
             text-align: center;
         }
         
@@ -43,7 +42,7 @@
         .config-panel {
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 25px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
@@ -51,7 +50,7 @@
         .config-title {
             font-size: 1.5rem;
             color: #1565c0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: 600;
         }
         
@@ -112,6 +111,10 @@
             color: #2c3e50;
             font-weight: bold;
             margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
         }
         
         .time-label {
@@ -163,36 +166,75 @@
             color: white;
         }
         
-        .info-panel {
+        .equipment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .equipment-table th {
+            background: linear-gradient(135deg, #3498db 0%, #1a5276 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .equipment-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .equipment-table tr:nth-child(even) {
             background-color: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 30px;
+        }
+        
+        .equipment-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .equipment-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: right;
+            padding-right: 10px;
+            width: 30%;
+        }
+        
+        .info-value {
             text-align: left;
-        }
-        
-        .info-panel h3 {
-            color: #3498db;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-        
-        .info-list {
-            list-style-type: none;
-        }
-        
-        .info-list li {
-            padding: 8px 0;
-            font-size: 1.1rem;
             color: #34495e;
-            display: flex;
-            align-items: center;
+            padding-left: 10px;
+            width: 70%;
         }
         
-        .info-list i {
-            margin-right: 10px;
-            width: 20px;
-            color: #3498db;
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-normal {
+            background-color: #2ecc71;
+        }
+        
+        .status-warning {
+            background-color: #f1c40f;
+        }
+        
+        .status-danger {
+            background-color: #e74c3c;
         }
         
         .footer {
@@ -214,10 +256,13 @@
             
             .current-time {
                 font-size: 2rem;
+                flex-direction: column;
             }
             
             .time-label {
                 font-size: 1.5rem;
+                margin-right: 0;
+                margin-bottom: 10px;
             }
             
             .status-icon {
@@ -228,6 +273,11 @@
             
             .date-input-container {
                 flex-direction: column;
+            }
+            
+            .equipment-table {
+                display: block;
+                overflow-x: auto;
             }
         }
         
@@ -253,17 +303,23 @@
                 height: 80px;
                 font-size: 2.2rem;
             }
+            
+            .equipment-table th, 
+            .equipment-table td {
+                padding: 10px 5px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>试验有效期监控</h1>
+            <h1>工器具管理与监控</h1>
             <div class="config-panel">
                 <div class="config-title">设置试验有效期</div>
                 <div class="date-input-container">
-                    <input type="date" id="expiryDateInput" class="date-input" value="2025-09-02">
+                    <input type="date" id="expiryDateInput" class="date-input">
                     <button id="saveButton" class="save-button">保存设置</button>
                 </div>
             </div>
@@ -271,55 +327,102 @@
         
         <div class="card">
             <div class="expiry-date" id="expiryDateDisplay">
-                试验有效期：2025年9月2日
+                试验有效期：未设置
             </div>
             
             <div class="current-time">
                 <span class="time-label">当前时间：</span>
-                <span id="timeDisplay">2023年11月15日 14:30:45</span>
+                <span id="timeDisplay">--年--月--日 --:--:--</span>
             </div>
             
             <div class="status-container">
                 <div class="status-icon" id="statusIcon">
-                    <i class="fas fa-check"></i>
+                    <i class="fas fa-question"></i>
                 </div>
-                <div class="status-text" id="statusText">状态正常</div>
+                <div class="status-text" id="statusText">未设置有效期</div>
             </div>
         </div>
         
-        <div class="info-panel">
-            <h3>状态说明</h3>
-            <ul class="info-list">
-                <li><i class="fas fa-circle-notch green"></i> 当前时间早于试验有效期 - 状态正常（绿色）</li>
-                <li><i class="fas fa-circle-notch yellow"></i> 当前时间等于试验有效期 - 即将到期（黄色）</li>
-                <li><i class="fas fa-circle-notch red"></i> 当前时间晚于试验有效期 - 已过期（红色）</li>
-            </ul>
-        </div>
+        <table class="equipment-table">
+            <thead>
+                <tr>
+                    <th colspan="2">工器具信息</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="info-label">设备编号</td>
+                    <td class="info-value">SB-2025-001</td>
+                </tr>
+                <tr>
+                    <td class="info-label">名称</td>
+                    <td class="info-value">个人保安线</td>
+                </tr>
+                <tr>
+                    <td class="info-label">试验项目</td>
+                    <td class="info-value">成组直流电阻试验</td>
+                </tr>
+                <tr>
+                    <td class="info-label">试验周期</td>
+                    <td class="info-value">&le;5年</td>
+                </tr>
+                <tr>
+                    <td class="info-label">上次试验日期</td>
+                    <td class="info-value" id="lastTestDate">未设置</td>
+                </tr>
+                <tr>
+                    <td class="info-label">下次试验日期</td>
+                    <td class="info-value" id="nextTestDate">未设置</td>
+                </tr>
+                <tr>
+                    <td class="info-label">备注</td>
+                    <td class="info-value">重要安全工具，使用前必须检查</td>
+                </tr>
+                <tr>
+                    <td class="info-label">当前状态</td>
+                    <td class="info-value"><span class="status-indicator" id="tableStatusIndicator"></span><span id="tableStatusText">未设置有效期</span></td>
+                </tr>
+            </tbody>
+        </table>
         
         <div class="footer">
-                    </div>
+            <p>工器具管理系统 &copy; 2025</p>
+        </div>
     </div>
 
     <script>
-        // 从本地存储获取试验有效期或使用默认值
-        let expiryDate = new Date(localStorage.getItem('expiryDate') || '2025-09-02');
+        // 从本地存储获取上次试验日期和有效期
+        let lastTestDate = localStorage.getItem('lastTestDate') ? new Date(localStorage.getItem('lastTestDate')) : null;
+        let expiryDate = localStorage.getItem('expiryDate') ? new Date(localStorage.getItem('expiryDate')) : null;
         
         // 初始化日期输入框的值
-        document.getElementById('expiryDateInput').value = formatDateForInput(expiryDate);
+        if (expiryDate) {
+            document.getElementById('expiryDateInput').value = formatDateForInput(expiryDate);
+        }
         
         // 更新显示
         updateExpiryDateDisplay();
+        updateLastTestDateDisplay();
+        updateNextTestDate();
         
         // 保存按钮事件
         document.getElementById('saveButton').addEventListener('click', function() {
             const inputDate = new Date(document.getElementById('expiryDateInput').value);
             
             if (isValidDate(inputDate)) {
-                expiryDate = inputDate;
-                // 保存到本地存储
+                // 设置上次试验日期为当前设置的日期
+                lastTestDate = inputDate;
+                localStorage.setItem('lastTestDate', formatDateForInput(lastTestDate));
+                
+                // 计算并设置新的有效期（5年后）
+                expiryDate = new Date(lastTestDate);
+                expiryDate.setFullYear(expiryDate.getFullYear() + 5);
                 localStorage.setItem('expiryDate', formatDateForInput(expiryDate));
+                
                 updateExpiryDateDisplay();
-                alert('试验有效期已更新！');
+                updateLastTestDateDisplay();
+                updateNextTestDate();
+                alert('试验有效期已更新！');试验
             } else {
                 alert('请输入有效的日期！');
             }
@@ -332,13 +435,41 @@
             return `${year}-${month}-${day}`;
         }
         
+        function formatDateDisplay(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}年${month}月${day}日`;
+        }
+        
         function updateExpiryDateDisplay() {
-            const year = expiryDate.getFullYear();
-            const month = (expiryDate.getMonth() + 1).toString().padStart(2, '0');
-            const day = expiryDate.getDate().toString().padStart(2, '0');
-            
-            document.getElementById('expiryDateDisplay').textContent = 
-                `试验有效期：${year}年${month}月${day}日`;
+            if (expiryDate) {
+                document.getElementById('expiryDateDisplay').textContent = 
+                    `试验有效期至：${formatDateDisplay(expiryDate)}`;
+            } else {
+                document.getElementById('expiryDateDisplay').textContent = 
+                    "试验有效期至：未设置";
+            }
+        }
+        
+        function updateLastTestDateDisplay() {
+            if (lastTestDate) {
+                document.getElementById('lastTestDate').textContent = 
+                    formatDateDisplay(lastTestDate);
+            } else {
+                document.getElementById('lastTestDate').textContent = "未设置";
+            }
+        }
+        
+        function updateNextTestDate() {
+            if (lastTestDate) {
+                const nextTestDate = new Date(lastTestDate);
+                nextTestDate.setFullYear(nextTestDate.getFullYear() + 5);
+                document.getElementById('nextTestDate').textContent = 
+                    formatDateDisplay(nextTestDate);
+            } else {
+                document.getElementById('nextTestDate').textContent = "未设置";
+            }
         }
         
         function isValidDate(d) {
@@ -361,7 +492,23 @@
                 `${year}年${month}月${day}日 ${hours}:${minutes}:${seconds}`;
             
             // 比较日期并更新状态
-            compareDates(now, expiryDate);
+            if (expiryDate) {
+                compareDates(now, expiryDate);
+            } else {
+                // 未设置有效期时的状态
+                const statusIcon = document.getElementById('statusIcon');
+                const statusText = document.getElementById('statusText');
+                const tableIndicator = document.getElementById('tableStatusIndicator');
+                const tableStatusText = document.getElementById('tableStatusText');
+                
+                statusIcon.className = 'status-icon';
+                statusIcon.innerHTML = '<i class="fas fa-question"></i>';
+                statusText.className = 'status-text';
+                statusText.textContent = '未设置有效期';
+                
+                tableIndicator.className = 'status-indicator';
+                tableStatusText.textContent = '未设置有效期';
+            }
         }
         
         function compareDates(current, expiry) {
@@ -371,10 +518,13 @@
             
             const statusIcon = document.getElementById('statusIcon');
             const statusText = document.getElementById('statusText');
+            const tableIndicator = document.getElementById('tableStatusIndicator');
+            const tableStatusText = document.getElementById('tableStatusText');
             
             // 移除所有颜色类
             statusIcon.classList.remove('green', 'yellow', 'red');
             statusText.classList.remove('green', 'yellow', 'red');
+            tableIndicator.classList.remove('status-normal', 'status-warning', 'status-danger');
             
             if (currentDate < expiryDate) {
                 // 当前日期早于试验有效期
@@ -382,18 +532,27 @@
                 statusIcon.innerHTML = '<i class="fas fa-check"></i>';
                 statusText.className = 'status-text green';
                 statusText.textContent = '状态正常';
+                
+                tableIndicator.className = 'status-indicator status-normal';
+                tableStatusText.textContent = '状态正常';
             } else if (currentDate > expiryDate) {
                 // 当前日期晚于试验有效期
                 statusIcon.className = 'status-icon red';
                 statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
                 statusText.className = 'status-text red';
                 statusText.textContent = '已过期';
+                
+                tableIndicator.className = 'status-indicator status-danger';
+                tableStatusText.textContent = '已过期';
             } else {
                 // 当前日期等于试验有效期
                 statusIcon.className = 'status-icon yellow';
                 statusIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
                 statusText.className = 'status-text yellow';
                 statusText.textContent = '今日到期';
+                
+                tableIndicator.className = 'status-indicator status-warning';
+                tableStatusText.textContent = '今日到期';
             }
         }
         
